@@ -1,0 +1,174 @@
+#!/usr/bin/python3
+
+import os, sys, readline, pathlib
+from pathlib import Path
+
+# -- global variables --
+# get cli-args
+CLI_ARGS=sys.argv
+# home-path
+HOME=str(Path.home())
+# current path
+CURRENT_PATH=str(pathlib.Path().absolute())
+
+# -- commands --
+BEFEHL="""
+ -rw: Ersetzt Leerzeichen in Dateinamen mit Unterstrich.
+ -ri: Findet den Index und Häufigkeit eines Zeichens oder
+      Zeichensatzes (z.B. suche einer Datei).
+ -rx: Sucht ein Zeichen und ersetzt dieses durch ein anderes
+      (mehrere Zeichen und ganze Zeichenfolgen sind möglich).
+      Mit dem Zusatz -e (-rx -e) lassen sich Dateiendungen
+      ändern. Der Zusatz -v (-rx -v bzw. -rx -e -v) gibt
+      Informationen im Terminal aus.
+
+ Beispiel Befehl:  rnf -rw <Pfad>/Datei(en)
+ ->                rnf -rw ~/Dokumente/test.txt
+                   ('*' für alle Dateien)
+"""  
+
+# remove whitespaces by renaming files
+def remove_whitespace(args):
+	FILES=args[2:]
+	for f in FILES:
+		WSPLIT=f.split(" ")
+		WJOIN="_".join(WSPLIT)
+		os.rename(f, WJOIN)
+
+# find files and index of characters within files
+def char_index(args):
+	FILES=args[2:]
+	argchar=str(input("Suchkriterium: "))
+	# iterate file-strings for chars
+	r=1
+	for f in FILES:
+		# get filenames
+		sFN=f.split("/")[-1]
+		eFN=sFN.split(".")[0]		
+		FILENAME=eFN
+		# get index
+		iLIST=[]
+		i=0			
+		# find characters and strings
+		for n in range(len(FILENAME)):
+			nLIST=[]
+			ic=0
+			for c in range(len(argchar)):
+				try:
+					nLIST.append(FILENAME[n+ic])
+				except IndexError:
+					""
+				ic=ic+1
+			# get search criteria from nLIST
+			scrit="".join(nLIST)
+			if scrit == argchar:
+				IDX=i
+				iLIST.append(IDX)
+			i=i+1
+		# print information
+		if len(iLIST) > 0:
+			print("Datei '"+str(FILENAME)+"': "+str(iLIST)+" ("+str(len(iLIST))+")")
+		r=r+1
+
+# remove specific characters and replace them with other characters
+def remove_replace_chars(args):
+	if args[2] != "-e":
+		print("Mehrere Such-/Ersetzkriterien durch Semikolon trennen (z.B. a;bc;...)")
+	inp_re=str(input("Suchen: "))
+	inp_rp=str(input("Ersetzen: "))
+	# get criterias
+	LIST_RE=inp_re.split(";")
+	LIST_RP=inp_rp.split(";")
+	######################
+	def change_filename():
+		if args[2] == "-v":
+			FILES=args[3:]
+		else:
+			FILES=args[2:]
+		# iterrate file-names
+		for f in FILES:
+			# extract filename
+			sFN=f.split("/")[-1]
+			eFN=sFN.split(".")[0]
+			# replace characters in filename = new filename
+			new_name=eFN
+			for n in range(len(LIST_RE)):
+				sString=LIST_RE[n]
+				rString=LIST_RP[n]
+				# replace by index
+				new_name=new_name.replace(sString,rString)
+			# rewrite filenames
+			path_val=f.split("/")[:-1][1:]
+			# extension(s)
+			get_extension=sFN.split(".")[1:]
+			fEXTENSION=".".join(get_extension)
+			if fEXTENSION != "":
+				fEXTENSION="."+fEXTENSION
+			# write new filenmae
+			if HOME == CURRENT_PATH:
+				fPATH="/".join(path_val)
+				fRENAME="/"+fPATH+"/"+new_name+fEXTENSION
+			else: 
+				fRENAME=new_name+fEXTENSION
+			# rename file(s)
+			os.rename(f,fRENAME)
+			# terminal-log
+			if args[2] == "-v":
+				if f != fRENAME:
+					print("Datei umbenannt: "+f+" -> "+fRENAME)
+	#######################
+	def change_extension():
+		if args[3] == "-v":
+			FILES=args[4:]
+		else:
+			FILES=args[3:]
+		# iterate file-extensions
+		for f in FILES:
+			# extract extension (if exists)
+			sEN=f.split("/")[-1]
+			eEN=sEN.split(".")[1:]
+			# replace characters in extension = new extension
+			nEXT=".".join(eEN)
+			new_extension=nEXT.replace(LIST_RE[0],LIST_RP[0])
+			# rewrite extension for file(s)
+			path_val="/".join(f.split("/")[:-1][1:])
+			FILENAME=(f.split("/")[-1]).split(".")[0]
+			if HOME == CURRENT_PATH:
+				if new_extension != "":
+					fRENAME="/"+path_val+"/"+FILENAME+"."+new_extension
+				else:
+					fRENAME="/"+path_val+"/"+FILENAME
+			else:
+				if new_extension != "":
+					fRENAME=FILENAME+"."+new_extension
+				else:
+					fRENAME=FILENAME
+			# rename file(s)
+			os.rename(f,fRENAME)
+			# terminal-log
+			if args[3] == "-v":
+				if f != fRENAME:
+					print("Datei umbenannt: "+f+" -> "+fRENAME)
+	#--------------------------------------------------------------------
+	# call function
+	if args[2] == "-e":
+		change_extension()
+	else:
+		change_filename()
+
+# check mode and call function
+try:
+	if CLI_ARGS[1] == "-rw":
+		remove_whitespace(CLI_ARGS)
+	elif CLI_ARGS[1] == "-rx":
+		remove_replace_chars(CLI_ARGS)
+	elif CLI_ARGS[1] == "-ri":
+		char_index(CLI_ARGS)
+	elif CLI_ARGS[1] == "--h":
+		print(BEFEHL)
+	else: print("Befehl nicht gefunden!!!")
+except IndexError:
+	print("Fehlende Argumente -> rnf --h zeigt Befehle an")
+except FileNotFoundError:
+	print("Falscher Dateiname oder Datei existiert nicht!!!")
+

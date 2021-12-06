@@ -1,0 +1,66 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+import os, sys, random as rd
+
+# command-line-args
+CLI_ARGS=sys.argv
+
+# password-element-strings
+PWSTR01="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$?_!&"  # with special characters
+PWSTR02="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"  # standard
+PWSTR03="0123456789abcdefghijklmnopqrstuvwxyz"  # p1
+PWSTR04="0123456789"  # p2
+PWSTR05="abcdefghijklmnopqrstuvwxyz"  # p3
+
+# create password with special-characters
+def create_safe_password01(ichars,pwargs):
+	# standard 16 characters
+	PWLIST=[]
+	def create_pw():
+		for n in range(ichars):
+			PWLIST.append("".join(rd.choices(pwargs)))
+	while True:
+		if "$" in PWLIST or "?" in PWLIST or "_" in PWLIST or "!" in PWLIST or "&" in PWLIST:
+			print("".join(PWLIST))
+			break
+		else:
+			PWLIST.clear()
+			create_pw()
+
+# create password
+def create_safe_password02(ichars,pwargs):
+	PWLIST=[]
+	for n in range(ichars):
+		PWLIST.append("".join(rd.choices(pwargs)))
+	print("".join(PWLIST))
+
+# run functions
+try:
+	if CLI_ARGS[1] != "":
+		try:
+			INT_ARGS=int(CLI_ARGS[1])
+			if INT_ARGS > 999:
+				print("Passwort-Größe überschritten, darf max. 999 groß sein!!!") ; exit()
+			if len(CLI_ARGS) > 2:
+				if CLI_ARGS[2] == "-sc":
+					create_safe_password01(INT_ARGS,PWSTR01)
+				elif CLI_ARGS[2] == "-p1":
+					create_safe_password02(INT_ARGS,PWSTR03)
+				elif CLI_ARGS[2] == "-p2":
+					create_safe_password02(INT_ARGS,PWSTR04)
+				elif CLI_ARGS[2] == "-p3":
+					create_safe_password02(INT_ARGS,PWSTR05)
+				else:
+					print("Falscher Befehl -> siehe Befehle: \n"
+					"  -sc: Sonderzeichen\n"
+					"  -p1: Zahlen und kleines Alphabet\n"
+					"  -p2: Nur Zahlen\n"
+					"  -p3: Nur kleines Alphabet")
+			else:
+				create_safe_password02(INT_ARGS,PWSTR02)
+		except ValueError:
+			print("Eingabe muss ganzzahlig und nummerisch sein!!!")
+except IndexError:
+	create_safe_password01(16,PWSTR01)
+
