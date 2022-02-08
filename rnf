@@ -132,7 +132,7 @@ def manipstr(manipex, strfn):
 			explst[1] = str(len(strfn))
 		# create search-string
 		search_mpr = strfn[int(explst[0]):int(explst[1])]
-	except (IndexError,ValueError):
+	except (IndexError, ValueError):
 		sys.exit("SyntaxError for expression (exp. must be numeric)!!!\n"
 		" -> write like ... [<exp>:<exp>], [:<exp>], [<exp>:] "
 		)
