@@ -85,6 +85,11 @@ def _get_password():
 	if fpassword == None:
 		fpassword = getpass(prompt="Enter password: ")
 
+	# check password for invalid ascii-encoding-characters
+	lst_invalid_charset = ["ö", "ä", "ü", "ß", "§"]
+	if len([n for n in fpassword if n in lst_invalid_charset]) > 0:
+		sys.exit("Invalid password!!! No special characters allowed!!!")
+
 	return fpassword
 
 
@@ -190,8 +195,8 @@ def decryptf(_file_, pwdec):
 	fkey = _get_key(pwdec, salt)
 	ft = Fernet(fkey)
 
-	# -- function for file decryption -> using temporary file --
 	def _chunks_decryption():
+	""" function for file decryption -> using temporary file """
 
 		with open(_file_, "r") as fcontent:
 
@@ -251,7 +256,7 @@ def mainf():
 	"""
 	This is the main function of the program.
 	The main function runs the encryption and decryption.
-	It is used as a standalone function.
+	It also checks on cli arguments
 	"""
 
 	if len(_argp()) < 1:
@@ -278,5 +283,6 @@ def mainf():
 
 if __name__ == "__main__":
 	mainf()
+
 
 
