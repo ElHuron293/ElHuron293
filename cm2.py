@@ -196,7 +196,7 @@ def decryptf(_file_, pwdec):
 	ft = Fernet(fkey)
 
 	def _chunks_decryption():
-	""" function for file decryption -> using temporary file """
+		""" function for file decryption -> using temporary file """
 
 		with open(_file_, "r") as fcontent:
 
