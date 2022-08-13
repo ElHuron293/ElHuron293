@@ -264,8 +264,8 @@ def _killrm_file(file_f, size_f, f=0):
 		if "-v" in lst_argvc:
 			print("Start to overwrite...", end="\r")
 
-		# create 1 MB ascii-encoded chunk of NUL for overwrite
-		mbchunk = ('\x00' * mbsize).encode("ascii")
+		# create 1 MB ascii-encoded chunk of '0' for overwrite
+		mbchunk = ('0' * mbsize).encode("ascii")
 
 		# open file and overwrite it with MB-chunks
 		f_kill = open(file_f, "r+b")
